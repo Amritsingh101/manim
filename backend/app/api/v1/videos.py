@@ -65,6 +65,7 @@ class JobResponse(BaseModel):
 @router.post("/", response_model=VideoResponse, status_code=status.HTTP_201_CREATED)
 async def create_video(
     body: CreateVideoRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     current_user_id: str = Depends(get_current_user_id),
 ):
@@ -81,18 +82,33 @@ async def create_video(
     await db.flush()
     video_id = str(video.id)
 
-    # Enqueue the Celery pipeline task
+    import os
     from app.workers.render_worker import run_pipeline
-    run_pipeline.apply_async(
-        kwargs={
-            "video_id": video_id,
-            "prompt": body.prompt,
-            "style": body.style,
-            "duration_seconds": body.duration_seconds,
-            "quality": body.quality,
-        },
-        countdown=1,  # 1 second delay to let DB commit propagate
-    )
+
+    if os.environ.get("CELERY_ENABLED", "true").lower() == "false":
+        # Run as a local FastAPI background task (reduces memory usage and bypasses Celery/Redis)
+        background_tasks.add_task(
+            run_pipeline,
+            None,  # self
+            video_id=video_id,
+            prompt=body.prompt,
+            style=body.style,
+            duration_seconds=body.duration_seconds,
+            quality=body.quality,
+        )
+    else:
+        # Enqueue via Celery queue broker
+        run_pipeline.apply_async(
+            kwargs={
+                "video_id": video_id,
+                "prompt": body.prompt,
+                "style": body.style,
+                "duration_seconds": body.duration_seconds,
+                "quality": body.quality,
+            },
+            countdown=1,  # 1 second delay to let DB commit propagate
+        )
+
 
     logger.info("Video created and enqueued", video_id=video_id, prompt_preview=body.prompt[:60])
     return _video_to_response(video)

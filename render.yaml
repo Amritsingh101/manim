@@ -10,6 +10,9 @@ services:
     envVars:
       - key: PORT
         value: "8000"
+      - key: CELERY_ENABLED
+        value: "false"
+
       
       # Model configurations
       - key: LIGHT_LLM_MODEL
