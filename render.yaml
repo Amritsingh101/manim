@@ -12,7 +12,7 @@ services:
       
       # Model configurations (matching your local .env values)
       - key: LIGHT_LLM_MODEL
-        value: "gemini-2.5-flash"
+        value: "gemini-3.1-flash-lite"
       - key: LIGHT_LLM_TEMPERATURE
         value: "0.4"
       - key: LIGHT_LLM_MAX_TOKENS
