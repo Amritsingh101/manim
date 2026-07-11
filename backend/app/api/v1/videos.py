@@ -83,14 +83,12 @@ async def create_video(
     video_id = str(video.id)
 
     import os
-    from app.workers.render_worker import run_pipeline
+    from app.workers.render_worker import run_pipeline, run_pipeline_direct
 
     if os.environ.get("CELERY_ENABLED", "true").lower() == "false":
-        # Run as a local FastAPI background task (reduces memory usage and bypasses Celery/Redis)
-        # Call .run() directly to bypass Celery's task wrapper (avoids 'multiple values' error)
+        # Run as a FastAPI background task — calls plain function, bypasses all Celery machinery
         background_tasks.add_task(
-            run_pipeline.run,
-            None,  # self (no Celery request context)
+            run_pipeline_direct,
             video_id=video_id,
             prompt=body.prompt,
             style=body.style,
@@ -110,6 +108,7 @@ async def create_video(
             },
             countdown=1,  # 1 second delay to let DB commit propagate
         )
+
 
 
     logger.info("Video created and enqueued", video_id=video_id, prompt_preview=body.prompt[:60])

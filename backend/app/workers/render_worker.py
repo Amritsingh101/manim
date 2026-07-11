@@ -177,7 +177,8 @@ def run_pipeline(
         {"success": False, "error": "..."} on final failure
     """
     db = _db()
-    log = logger.bind(video_id=video_id, task_id=self.request.id)
+    task_id = self.request.id if (self and hasattr(self, "request")) else f"bg-{uuid.uuid4().hex[:8]}"
+    log = logger.bind(video_id=video_id, task_id=task_id)
     log.info("Pipeline starting", prompt_preview=prompt[:80])
 
     try:
@@ -390,8 +391,9 @@ def run_pipeline(
 
     except Exception as exc:
         log.error("Pipeline unexpected error", error=str(exc), exc_info=True)
-        retry_count = self.request.retries
-        retries_left = self.max_retries - retry_count
+        retry_count = self.request.retries if (self and hasattr(self, "request")) else 0
+        max_retries = self.max_retries if (self and hasattr(self, "max_retries")) else 0
+        retries_left = max_retries - retry_count
 
         try:
             db.rollback()
@@ -412,12 +414,34 @@ def run_pipeline(
         except Exception as db_exc:
             log.error("Failed to update status after error", error=str(db_exc))
 
-        try:
-            raise self.retry(exc=exc, countdown=30 * (retry_count + 1))
-        except Retry:
-            raise
+        if self and hasattr(self, "request") and hasattr(self, "retry"):
+            try:
+                raise self.retry(exc=exc, countdown=30 * (retry_count + 1))
+            except Retry:
+                raise
+        else:
+            raise exc
     finally:
         db.close()
+
+
+# ── Direct (non-Celery) entrypoint for FastAPI BackgroundTasks ─────────────────
+def run_pipeline_direct(
+    video_id: str,
+    prompt: str,
+    style: str,
+    duration_seconds: int,
+    quality: str,
+) -> dict:
+    """Plain Python wrapper — no Celery involved. Used when CELERY_ENABLED=false."""
+    return run_pipeline.run(
+        None,  # self — no Celery request context
+        video_id=video_id,
+        prompt=prompt,
+        style=style,
+        duration_seconds=duration_seconds,
+        quality=quality,
+    )
 
 
 # ── Render subprocess ──────────────────────────────────────────────────────────
