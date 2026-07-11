@@ -87,15 +87,17 @@ async def create_video(
 
     if os.environ.get("CELERY_ENABLED", "true").lower() == "false":
         # Run as a local FastAPI background task (reduces memory usage and bypasses Celery/Redis)
+        # Call .run() directly to bypass Celery's task wrapper (avoids 'multiple values' error)
         background_tasks.add_task(
-            run_pipeline,
-            None,  # self
+            run_pipeline.run,
+            None,  # self (no Celery request context)
             video_id=video_id,
             prompt=body.prompt,
             style=body.style,
             duration_seconds=body.duration_seconds,
             quality=body.quality,
         )
+
     else:
         # Enqueue via Celery queue broker
         run_pipeline.apply_async(
