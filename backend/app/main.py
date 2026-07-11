@@ -49,9 +49,16 @@ def create_app() -> FastAPI:
 
     # ── Middleware ──────────────────────────────────────────────────────────────
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+    # In debug/dev mode, allow all origins via regex to support dynamic local tunnels
+    # allow_origin_regex=".*" permits credentials=True (unlike allow_origins=["*"])
+    cors_origins = ["*"] if not settings.DEBUG else []
+    cors_regex = ".*" if settings.DEBUG else None
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=settings.CORS_ORIGINS if not settings.DEBUG else [],
+        allow_origin_regex=cors_regex,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

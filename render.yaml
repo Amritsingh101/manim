@@ -1,0 +1,56 @@
+services:
+  # ── FastAPI Web Service ───────────────────────────────────────────────────────
+  - type: web
+    name: manimai-api
+    runtime: docker
+    dockerContext: backend
+    dockerfilePath: Dockerfile # relative to dockerContext
+    plan: free
+    releaseCommand: alembic upgrade head
+    envVars:
+      - key: PORT
+        value: "8000" # Expose on port 8000 (Render will map this to public port)
+      - fromGroup: manimai-secrets
+
+  # ── Celery Rendering Worker ───────────────────────────────────────────────────
+  - type: worker
+    name: manimai-worker
+    runtime: docker
+    dockerContext: backend
+    dockerfilePath: Dockerfile # relative to dockerContext
+    plan: free
+    startCommand: celery -A app.workers.celery_app worker --loglevel=info
+    envVars:
+      - fromGroup: manimai-secrets
+
+# ── Shared Environment Variables Group ─────────────────────────────────────────
+envVarGroups:
+  - name: manimai-secrets
+    envVars:
+      - key: DATABASE_URL
+        placeholder: "postgresql+asyncpg://..."
+      - key: SYNC_DATABASE_URL
+        placeholder: "postgresql+psycopg2://..."
+      - key: REDIS_URL
+        placeholder: "rediss://..."
+      - key: CELERY_BROKER_URL
+        placeholder: "rediss://..."
+      - key: CELERY_RESULT_BACKEND
+        placeholder: "rediss://..."
+      - key: GEMINI_API_KEY
+        placeholder: "your-gemini-api-key"
+      - key: SUPABASE_URL
+        placeholder: "https://your-supabase.supabase.co"
+      - key: SUPABASE_ANON_KEY
+        placeholder: "your-anon-key"
+      - key: SUPABASE_JWT_SECRET
+        placeholder: "your-jwt-secret"
+      - key: CLOUDINARY_CLOUD_NAME
+        placeholder: "your-cloudinary-name"
+      - key: CLOUDINARY_API_KEY
+        placeholder: "your-cloudinary-key"
+      - key: CLOUDINARY_API_SECRET
+        placeholder: "your-cloudinary-secret"
+      - key: CORS_ORIGINS
+        placeholder: "http://localhost:5173,https://your-frontend-url.onrender.com"
+
