@@ -7,10 +7,36 @@ services:
     dockerfilePath: backend/Dockerfile
     plan: free
     envVars:
-
       - key: PORT
         value: "8000"
-      - fromGroup: manimai-secrets
+      
+      # Secrets to be entered during initial setup on the Render Dashboard
+      - key: DATABASE_URL
+        sync: false
+      - key: SYNC_DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+      - key: CELERY_RESULT_BACKEND
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
 
   # ── Celery Rendering Worker ───────────────────────────────────────────────────
   - type: worker
@@ -19,38 +45,71 @@ services:
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
-    # Correct override key for Docker services
     dockerCommand: celery -A app.workers.celery_app worker --loglevel=info
     envVars:
-      - fromGroup: manimai-secrets
-
-# ── Shared Environment Variables Group ─────────────────────────────────────────
-envVarGroups:
-  - name: manimai-secrets
-    envVars:
+      # Link worker env vars to the API service env vars to avoid typing them twice
       - key: DATABASE_URL
-        value: "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: DATABASE_URL
       - key: SYNC_DATABASE_URL
-        value: "postgresql+psycopg2://postgres:postgres@localhost:5432/postgres"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: SYNC_DATABASE_URL
       - key: REDIS_URL
-        value: "rediss://default:password@localhost:6379"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: REDIS_URL
       - key: CELERY_BROKER_URL
-        value: "rediss://default:password@localhost:6379"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: CELERY_BROKER_URL
       - key: CELERY_RESULT_BACKEND
-        value: "rediss://default:password@localhost:6379"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: CELERY_RESULT_BACKEND
       - key: GEMINI_API_KEY
-        value: "your-gemini-api-key"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: GEMINI_API_KEY
       - key: SUPABASE_URL
-        value: "https://your-supabase.supabase.co"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: SUPABASE_URL
       - key: SUPABASE_ANON_KEY
-        value: "your-anon-key"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: SUPABASE_ANON_KEY
       - key: SUPABASE_JWT_SECRET
-        value: "your-jwt-secret"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: SUPABASE_JWT_SECRET
       - key: CLOUDINARY_CLOUD_NAME
-        value: "your-cloudinary-name"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: CLOUDINARY_CLOUD_NAME
       - key: CLOUDINARY_API_KEY
-        value: "your-cloudinary-key"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: CLOUDINARY_API_KEY
       - key: CLOUDINARY_API_SECRET
-        value: "your-cloudinary-secret"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: CLOUDINARY_API_SECRET
       - key: CORS_ORIGINS
-        value: "http://localhost:5173,https://your-frontend.onrender.com"
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: CORS_ORIGINS
