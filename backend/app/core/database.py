@@ -32,7 +32,10 @@ def _clean_asyncpg_url(url: str) -> tuple[str, dict]:
     clean = re.sub(r"[?&]sslmode=[^&]*", "", url).rstrip("?").rstrip("&")
     # 'require' = encrypt but skip certificate verification
     connect_args = {"ssl": "require"} if needs_ssl else {}
+    # Disable prepared statement caching to support PgBouncer transaction pooling
+    connect_args["statement_cache_size"] = 0
     return clean, connect_args
+
 
 
 _db_url, _connect_args = _clean_asyncpg_url(settings.DATABASE_URL)
