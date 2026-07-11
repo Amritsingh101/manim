@@ -80,6 +80,10 @@ async def create_video(
     )
     db.add(video)
     await db.flush()
+    # Commit NOW so the background task's sync DB session can see the video row.
+    # Without this, the background task starts before get_db's automatic commit,
+    # causing "Video not found — stale task, aborting".
+    await db.commit()
     video_id = str(video.id)
 
     import os
