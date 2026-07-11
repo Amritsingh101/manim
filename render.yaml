@@ -6,10 +6,11 @@ services:
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
-    preDeployCommand: alembic upgrade head
+    # Workaround for Free Tier (chains migrations before starting Uvicorn server)
+    dockerCommand: /bin/sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PORT
-        value: "8000" # Expose on port 8000 (Render will map this to public port)
+        value: "8000"
       - fromGroup: manimai-secrets
 
   # ── Celery Rendering Worker ───────────────────────────────────────────────────
@@ -19,7 +20,8 @@ services:
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
-    startCommand: celery -A app.workers.celery_app worker --loglevel=info
+    # Correct override key for Docker services
+    dockerCommand: celery -A app.workers.celery_app worker --loglevel=info
     envVars:
       - fromGroup: manimai-secrets
 
@@ -28,29 +30,28 @@ envVarGroups:
   - name: manimai-secrets
     envVars:
       - key: DATABASE_URL
-        placeholder: "postgresql+asyncpg://..."
+        value: "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
       - key: SYNC_DATABASE_URL
-        placeholder: "postgresql+psycopg2://..."
+        value: "postgresql+psycopg2://postgres:postgres@localhost:5432/postgres"
       - key: REDIS_URL
-        placeholder: "rediss://..."
+        value: "rediss://default:password@localhost:6379"
       - key: CELERY_BROKER_URL
-        placeholder: "rediss://..."
+        value: "rediss://default:password@localhost:6379"
       - key: CELERY_RESULT_BACKEND
-        placeholder: "rediss://..."
+        value: "rediss://default:password@localhost:6379"
       - key: GEMINI_API_KEY
-        placeholder: "your-gemini-api-key"
+        value: "your-gemini-api-key"
       - key: SUPABASE_URL
-        placeholder: "https://your-supabase.supabase.co"
+        value: "https://your-supabase.supabase.co"
       - key: SUPABASE_ANON_KEY
-        placeholder: "your-anon-key"
+        value: "your-anon-key"
       - key: SUPABASE_JWT_SECRET
-        placeholder: "your-jwt-secret"
+        value: "your-jwt-secret"
       - key: CLOUDINARY_CLOUD_NAME
-        placeholder: "your-cloudinary-name"
+        value: "your-cloudinary-name"
       - key: CLOUDINARY_API_KEY
-        placeholder: "your-cloudinary-key"
+        value: "your-cloudinary-key"
       - key: CLOUDINARY_API_SECRET
-        placeholder: "your-cloudinary-secret"
+        value: "your-cloudinary-secret"
       - key: CORS_ORIGINS
-        placeholder: "http://localhost:5173,https://your-frontend-url.onrender.com"
-
+        value: "http://localhost:5173,https://your-frontend.onrender.com"
