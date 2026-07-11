@@ -17,6 +17,9 @@ COPY . .
 # Expose the API port
 EXPOSE 8000
 
-# Default command (FastAPI Web Server). 
-# Note: Render overrides this command for the Celery Worker service.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Clear any default entrypoint from the base image so we can run commands directly
+ENTRYPOINT []
+
+# Default command (runs Alembic migrations and then starts FastAPI on the Render-assigned port)
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+

@@ -6,9 +6,8 @@ services:
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
-    # Workaround for Free Tier (chains migrations before starting Uvicorn server)
-    dockerCommand: /bin/sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
+
       - key: PORT
         value: "8000"
       - fromGroup: manimai-secrets
