@@ -6,7 +6,7 @@ services:
     dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
-    releaseCommand: alembic upgrade head
+    preDeployCommand: alembic upgrade head
     envVars:
       - key: PORT
         value: "8000" # Expose on port 8000 (Render will map this to public port)
