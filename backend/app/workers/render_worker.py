@@ -177,7 +177,8 @@ def run_pipeline(
         {"success": False, "error": "..."} on final failure
     """
     db = _db()
-    task_id = self.request.id if (self and hasattr(self, "request")) else f"bg-{uuid.uuid4().hex[:8]}"
+    celery_task_id = getattr(getattr(self, "request", None), "id", None)
+    task_id = celery_task_id or f"bg-{uuid.uuid4().hex[:8]}"
     log = logger.bind(video_id=video_id, task_id=task_id)
     log.info("Pipeline starting", prompt_preview=prompt[:80])
 
@@ -433,9 +434,8 @@ def run_pipeline_direct(
     duration_seconds: int,
     quality: str,
 ) -> dict:
-    """Plain Python wrapper — no Celery involved. Used when CELERY_ENABLED=false."""
+    """Plain Python wrapper — no Celery dispatch. Used when CELERY_ENABLED=false."""
     return run_pipeline.run(
-        None,  # self — no Celery request context
         video_id=video_id,
         prompt=prompt,
         style=style,
