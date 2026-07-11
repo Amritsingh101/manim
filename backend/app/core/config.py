@@ -100,8 +100,7 @@ class Settings(BaseSettings):
         return v
 
     # ── Manim ─────────────────────────────────────────────────────────────────
-    MANIM_TIMEOUT_SECONDS: int = 180  # 3 min — enough for low quality on Free Tier
-
+    MANIM_TIMEOUT_SECONDS: int = 360
 
     # ── Pipeline Smart Retry ───────────────────────────────────────────────────
     # Max compilation attempts before giving up
