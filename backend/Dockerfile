@@ -20,6 +20,7 @@ EXPOSE 8000
 # Clear any default entrypoint from the base image so we can run commands directly
 ENTRYPOINT []
 
-# Default command (runs Alembic migrations and then starts FastAPI on the Render-assigned port)
-CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Default command (runs Celery worker in background, then migrations and FastAPI in foreground)
+CMD celery -A app.workers.celery_app worker --loglevel=info --pool=solo & alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
 
