@@ -451,12 +451,18 @@ def _render_manim(video_id: str, code: str, quality: str, log) -> dict:
     Write Manim code to a temp file and invoke manim render.
     Returns {"success": True, "path": "..."} or {"success": False, "stderr": "..."}.
     """
+    # On the Render Free Tier (0.1 vCPU, 512 MB RAM) cap to low quality for speed.
+    # Low quality = 480p @ 15fps — renders ~3x faster than medium on shared CPU.
+    free_tier = os.environ.get("CELERY_ENABLED", "true").lower() == "false"
+    if free_tier:
+        quality = "low"
+
     quality_map = {
         "low":    "-ql",
         "medium": "-qm",
         "high":   "-qh",
     }
-    quality_flag = quality_map.get(quality, "-qm")
+    quality_flag = quality_map.get(quality, "-ql")
     media_dir = Path(settings.MEDIA_DIR)
     media_dir.mkdir(parents=True, exist_ok=True)
 
