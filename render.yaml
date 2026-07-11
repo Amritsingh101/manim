@@ -10,6 +10,20 @@ services:
       - key: PORT
         value: "8000"
       
+      # Model configurations (matching your local .env values)
+      - key: LIGHT_LLM_MODEL
+        value: "gemini-2.5-flash"
+      - key: LIGHT_LLM_TEMPERATURE
+        value: "0.4"
+      - key: LIGHT_LLM_MAX_TOKENS
+        value: "12092"
+      - key: HEAVY_LLM_MODEL
+        value: "gemini-3.5-flash"
+      - key: HEAVY_LLM_TEMPERATURE
+        value: "0.2"
+      - key: HEAVY_LLM_MAX_TOKENS
+        value: "20536"
+
       # Secrets to be entered during initial setup on the Render Dashboard
       - key: DATABASE_URL
         sync: false
@@ -113,3 +127,35 @@ services:
           type: web
           name: manimai-api
           envVarKey: CORS_ORIGINS
+      
+      # Link model configs
+      - key: LIGHT_LLM_MODEL
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: LIGHT_LLM_MODEL
+      - key: LIGHT_LLM_TEMPERATURE
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: LIGHT_LLM_TEMPERATURE
+      - key: LIGHT_LLM_MAX_TOKENS
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: LIGHT_LLM_MAX_TOKENS
+      - key: HEAVY_LLM_MODEL
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: HEAVY_LLM_MODEL
+      - key: HEAVY_LLM_TEMPERATURE
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: HEAVY_LLM_TEMPERATURE
+      - key: HEAVY_LLM_MAX_TOKENS
+        fromService:
+          type: web
+          name: manimai-api
+          envVarKey: HEAVY_LLM_MAX_TOKENS
