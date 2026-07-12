@@ -81,6 +81,7 @@ function VideoCard({ video, i }) {
           style={{ padding: 0 }}
         >
           <div className="recent-video-thumb">
+            <span className={`badge ${statusClass} recent-video-badge`}>{video.status}</span>
             {(() => {
               const rawUrl = video.thumbnail_url || video.video_url;
               const thumbUrl = rawUrl ? rawUrl.replace(/\.[^/.]+$/, ".jpg") : null;
@@ -95,7 +96,7 @@ function VideoCard({ video, i }) {
                 </div>
               );
             })()}
-            <span className={`badge ${statusClass} recent-video-badge`}>{video.status}</span>
+
           </div>
           <div className="recent-video-info">
             <div className="recent-video-title">{video.title || video.prompt?.slice(0, 36) || 'Untitled'}</div>
