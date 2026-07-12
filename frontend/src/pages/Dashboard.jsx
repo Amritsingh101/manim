@@ -82,7 +82,8 @@ function VideoCard({ video, i }) {
         >
           <div className="recent-video-thumb">
             {(() => {
-              const thumbUrl = video.thumbnail_url || (video.video_url ? video.video_url.replace(/\.[^/.]+$/, ".jpg") : null);
+              const rawUrl = video.thumbnail_url || video.video_url;
+              const thumbUrl = rawUrl ? rawUrl.replace(/\.[^/.]+$/, ".jpg") : null;
               return thumbUrl ? (
                 <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
