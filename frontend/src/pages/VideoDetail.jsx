@@ -93,7 +93,7 @@ export default function VideoDetail() {
                 controls
                 autoPlay
                 style={{ width: '100%', display: 'block', borderRadius: 'var(--radius-lg)' }}
-                poster={video.thumbnail_url || undefined}
+                poster={video.thumbnail_url || (video.video_url ? video.video_url.replace(/\.[^/.]+$/, ".jpg") : undefined)}
               >
                 <source src={video.video_url} type="video/mp4" />
               </video>

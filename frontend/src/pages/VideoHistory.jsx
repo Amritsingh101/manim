@@ -19,16 +19,21 @@ function VideoCard({ video, i }) {
       <Link to={`/videos/${video.id}`} style={{ textDecoration: 'none' }}>
         <div className="card" style={{ display: 'flex', gap: 16, alignItems: 'flex-start', cursor: 'pointer' }}>
           {/* Thumbnail */}
-          <div className="history-thumbnail" style={{
-            width: 120, height: 72, borderRadius: 8, flexShrink: 0,
-            background: video.thumbnail_url ? 'transparent' : 'var(--accent-subtle)',
-            overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            {video.thumbnail_url
-              ? <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <Film size={28} color="var(--purple-light)" opacity={0.5} />
-            }
-          </div>
+          {(() => {
+            const thumbUrl = video.thumbnail_url || (video.video_url ? video.video_url.replace(/\.[^/.]+$/, ".jpg") : null);
+            return (
+              <div className="history-thumbnail" style={{
+                width: 120, height: 72, borderRadius: 8, flexShrink: 0,
+                background: thumbUrl ? 'transparent' : 'var(--accent-subtle)',
+                overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {thumbUrl
+                  ? <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <Film size={28} color="var(--purple-light)" opacity={0.5} />
+                }
+              </div>
+            );
+          })()}
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>

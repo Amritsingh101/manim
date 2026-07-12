@@ -81,17 +81,19 @@ function VideoCard({ video, i }) {
           style={{ padding: 0 }}
         >
           <div className="recent-video-thumb">
-            {video.thumbnail_url
-              ? <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : (
+            {(() => {
+              const thumbUrl = video.thumbnail_url || (video.video_url ? video.video_url.replace(/\.[^/.]+$/, ".jpg") : null);
+              return thumbUrl ? (
+                <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
                 <div className="recent-video-thumb-placeholder">
                   <Film size={24} color="var(--text-muted)" opacity={0.6} />
                   {(video.status === 'pending' || video.status === 'processing') && (
                     <div className="thumb-processing-bar"><div className="thumb-processing-fill" /></div>
                   )}
                 </div>
-              )
-            }
+              );
+            })()}
             <span className={`badge ${statusClass} recent-video-badge`}>{video.status}</span>
           </div>
           <div className="recent-video-info">
