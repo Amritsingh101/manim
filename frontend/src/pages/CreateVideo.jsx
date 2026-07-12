@@ -122,7 +122,7 @@ export default function CreateVideo() {
         {/* Settings */}
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+          <div className="create-settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
             {/* Style */}
             <div className="form-group">
               <label className="label">Visual Style</label>

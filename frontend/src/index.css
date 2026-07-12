@@ -250,8 +250,188 @@ code, pre { font-family: 'JetBrains Mono', monospace; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.4s ease; }
 
+/* ── Layout — Sidebar / Mobile Header / Bottom Nav ────────────────────────── */
+
+/* Desktop sidebar */
+.sidebar-desktop {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+/* Mobile top header — hidden on desktop */
+.mobile-header {
+  display: none;
+}
+
+/* Mobile slide-down menu — hidden on desktop */
+.mobile-menu {
+  display: none;
+}
+
+/* Mobile bottom nav — hidden on desktop */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  overflow: auto;
+}
+
+.main-inner {
+  padding: 32px;
+  min-height: 100%;
+}
+
+/* ── VideoDetail Layout ──────────────────────────────────────────────────── */
+.video-detail-root {
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.video-detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+}
+
+/* On desktop: side-by-side grid (content | pipeline sidebar) */
+.video-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+}
+
+/* Pipeline shown in sidebar on desktop, hidden as standalone block */
+.video-detail-pipeline-mobile { display: none; }
+.video-detail-meta-mobile     { display: none; }
+.video-detail-sidebar         { display: flex; flex-direction: column; gap: 16px; }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .container { padding: 0 16px; }
   .hide-mobile { display: none !important; }
+
+  /* Sidebar: hide on mobile */
+  .sidebar-desktop { display: none; }
+
+  /* Mobile header: show */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: 57px;
+    padding: 0 16px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Mobile menu overlay: show */
+  .mobile-menu {
+    display: block;
+    position: fixed;
+    top: 57px;
+    left: 0;
+    right: 0;
+    z-index: 101;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Mobile bottom nav: show */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+  }
+
+  /* Main content: account for fixed header + bottom nav */
+  .main-content {
+    padding-top: 57px;
+    padding-bottom: 72px;
+  }
+
+  .main-inner {
+    padding: 20px 16px;
+  }
+
+  /* VideoDetail: single-column on mobile */
+  .video-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Show pipeline at the top on mobile (before main content) */
+  .video-detail-pipeline-mobile { display: block; margin-bottom: 0; }
+  /* Show meta/prompt below pipeline on mobile */
+  .video-detail-meta-mobile     { display: flex; flex-direction: column; gap: 12px; margin-top: 0; }
+  /* Hide sidebar on mobile (it's duplicated into the mobile blocks above) */
+  .video-detail-sidebar         { display: none; }
+
+  .video-detail-title-row {
+    flex-direction: column;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  /* Dashboard */
+  .dashboard-quick-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* CreateVideo settings grid */
+  .create-settings-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
+
+@media (max-width: 480px) {
+  .main-inner {
+    padding: 16px 12px;
+  }
+
+  h1 { font-size: clamp(20px, 6vw, 32px) !important; }
+  h2 { font-size: clamp(16px, 5vw, 24px) !important; }
+
+  .btn-lg {
+    padding: 12px 20px;
+    font-size: 14px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Hide video history thumbnail on tiny phones */
+  .history-thumbnail {
+    display: none !important;
+  }
+}
+

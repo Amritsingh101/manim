@@ -19,7 +19,7 @@ function VideoCard({ video, i }) {
       <Link to={`/videos/${video.id}`} style={{ textDecoration: 'none' }}>
         <div className="card" style={{ display: 'flex', gap: 16, alignItems: 'flex-start', cursor: 'pointer' }}>
           {/* Thumbnail */}
-          <div style={{
+          <div className="history-thumbnail" style={{
             width: 120, height: 72, borderRadius: 8, flexShrink: 0,
             background: video.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(20,184,166,0.2))',
             overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -31,8 +31,8 @@ function VideoCard({ video, i }) {
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
                 {video.title || video.prompt.slice(0, 60)}
               </span>
               <StatusBadge status={video.status} />
@@ -40,7 +40,7 @@ function VideoCard({ video, i }) {
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
               {video.description || video.prompt}
             </p>
-            <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
               <span><Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
                 {formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}
               </span>

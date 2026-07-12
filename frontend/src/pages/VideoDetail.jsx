@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useVideo, useVideoJobs, useDeleteVideo } from '../api/hooks'
 import PipelineStatus from '../components/PipelineStatus'
-import { ArrowLeft, Trash2, Download, RefreshCw, Play, Code2 } from 'lucide-react'
+import { ArrowLeft, Trash2, Download, Play, Code2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,7 +18,8 @@ export default function VideoDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: video, isLoading } = useVideo(id)
-  const { data: jobs = [] } = useVideoJobs(id)
+  // Pass videoStatus so polling continues even before any jobs are created
+  const { data: jobs = [] } = useVideoJobs(id, video?.status)
   const { mutate: deleteVideo, isPending: deleting } = useDeleteVideo()
   const [showCode, setShowCode] = useState(false)
 
@@ -40,24 +41,24 @@ export default function VideoDetail() {
   const isProcessing = ['pending', 'processing'].includes(video.status)
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div className="video-detail-root">
       {/* Back */}
-      <Link to="/history" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 24, fontSize: 13, color: 'var(--text-secondary)' }}>
+      <Link to="/history" className="back-link">
         <ArrowLeft size={14} /> All Videos
       </Link>
 
       {/* Title row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <h1 style={{ fontSize: 26, fontWeight: 800 }}>{video.title || 'Generating…'}</h1>
+      <div className="video-detail-title-row">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+            <h1 style={{ fontSize: 'clamp(20px, 4vw, 26px)', fontWeight: 800 }}>{video.title || 'Generating…'}</h1>
             <StatusBadge status={video.status} />
           </div>
           {video.description && (
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', maxWidth: 600 }}>{video.description}</p>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
           {video.video_url && (
             <a href={video.video_url} download className="btn btn-secondary btn-sm">
               <Download size={14} /> Download
@@ -69,7 +70,15 @@ export default function VideoDetail() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: video.status === 'completed' ? '1fr 340px' : '1fr', gap: 24 }}>
+      {/* Pipeline progress — always show on mobile as first block */}
+      <div className="video-detail-pipeline-mobile">
+        <div className="card" style={{ padding: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Pipeline Progress</h3>
+          <PipelineStatus jobs={jobs} videoStatus={video.status} />
+        </div>
+      </div>
+
+      <div className="video-detail-grid">
         {/* Left col */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Video player */}
@@ -95,7 +104,7 @@ export default function VideoDetail() {
           {isProcessing && (
             <div className="card" style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', padding: 60, gap: 20,
+              justifyContent: 'center', padding: 'clamp(24px, 5vw, 60px)', gap: 20,
             }}>
               <div style={{ position: 'relative', width: 80, height: 80 }}>
                 <div style={{
@@ -120,7 +129,7 @@ export default function VideoDetail() {
                   AI pipeline running…
                 </p>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                  This typically takes 2-5 minutes. Live progress shown on the right.
+                  This typically takes 2–5 minutes. Live progress shown below.
                 </p>
               </div>
             </div>
@@ -177,8 +186,8 @@ export default function VideoDetail() {
           )}
         </div>
 
-        {/* Pipeline sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Pipeline sidebar — desktop only, hidden on mobile (shown above) */}
+        <div className="video-detail-sidebar">
           <div className="card" style={{ padding: 20 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Pipeline Progress</h3>
             <PipelineStatus jobs={jobs} videoStatus={video.status} />
@@ -208,6 +217,31 @@ export default function VideoDetail() {
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Original Prompt</p>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{video.prompt}</p>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile metadata + prompt below pipeline */}
+      <div className="video-detail-meta-mobile">
+        <div className="card" style={{ padding: 20 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 14 }}>Details</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[
+              ['Style', video.style],
+              ['Quality', video.quality],
+              ['Duration', video.duration_seconds ? `${video.duration_seconds}s` : '—'],
+              ['Compile Attempts', video.compile_attempt || 1],
+              ['Created', new Date(video.created_at).toLocaleDateString()],
+            ].map(([k, v]) => (
+              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{k}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 500 }}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card" style={{ padding: 16 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Original Prompt</p>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{video.prompt}</p>
         </div>
       </div>
     </div>

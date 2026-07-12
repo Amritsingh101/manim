@@ -37,16 +37,18 @@ export function useVideo(id) {
   })
 }
 
-export function useVideoJobs(id) {
+export function useVideoJobs(id, videoStatus) {
   return useQuery({
     queryKey: ['video-jobs', id],
     queryFn: () => videosApi.getJobs(id).then((r) => r.data),
     enabled: !!id,
     refetchInterval: (query) => {
-      // Keep polling if any job is running/pending
       const jobs = query.state.data || []
-      const active = jobs.some((j) => ['running', 'pending', 'retrying'].includes(j.status))
-      return active ? 1500 : false
+      // Poll if any job is actively running/pending/retrying
+      const jobsActive = jobs.some((j) => ['running', 'pending', 'retrying'].includes(j.status))
+      // Also poll if the video itself is still in flight (jobs may not exist yet)
+      const videoInFlight = videoStatus === 'processing' || videoStatus === 'pending'
+      return jobsActive || videoInFlight ? 1500 : false
     },
   })
 }

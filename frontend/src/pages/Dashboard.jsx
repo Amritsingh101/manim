@@ -58,7 +58,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 36 }}>
+      <div className="dashboard-quick-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 36 }}>
         <Link to="/create" style={{ textDecoration: 'none' }}>
           <motion.div
             whileHover={{ y: -2 }}
