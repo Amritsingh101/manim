@@ -59,9 +59,48 @@ def _db() -> Session:
     return _SyncSession()
 
 
+# ── Per-task event loop ───────────────────────────────────────────────────────
+# asyncio.run() creates AND destroys an event loop each time it is called.
+# The google-genai SDK's async HTTP client is bound to the loop it was created
+# on; when that loop is closed the client becomes unusable, causing
+# "Event loop is closed" on the next stage's first API call.
+#
+# Solution: create ONE loop per pipeline task and drive every coroutine with
+# loop.run_until_complete().  The loop (and the genai client with it) lives
+# for the full pipeline run and is closed cleanly in the finally block.
+
+_task_loop: asyncio.AbstractEventLoop | None = None
+
+
+def _new_task_loop() -> asyncio.AbstractEventLoop:
+    """Create a fresh event loop for a pipeline task."""
+    global _task_loop
+    _task_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(_task_loop)
+    return _task_loop
+
+
+def _close_task_loop() -> None:
+    """Close the task-local event loop after the pipeline finishes."""
+    global _task_loop
+    if _task_loop and not _task_loop.is_closed():
+        try:
+            # Give pending cleanup callbacks a chance to run
+            _task_loop.run_until_complete(_task_loop.shutdown_asyncgens())
+        except Exception:
+            pass
+        _task_loop.close()
+    _task_loop = None
+    asyncio.set_event_loop(None)
+
+
 def _run(coro):
-    """Run an async coroutine synchronously inside a Celery task."""
-    return asyncio.run(coro)
+    """Run an async coroutine on the task-local event loop."""
+    global _task_loop
+    if _task_loop is None or _task_loop.is_closed():
+        # Fallback: should not happen during normal pipeline, but be safe
+        _new_task_loop()
+    return _task_loop.run_until_complete(coro)
 
 
 # ── DB helpers ─────────────────────────────────────────────────────────────────
@@ -181,6 +220,10 @@ def run_pipeline(
     task_id = celery_task_id or f"bg-{uuid.uuid4().hex[:8]}"
     log = logger.bind(video_id=video_id, task_id=task_id)
     log.info("Pipeline starting", prompt_preview=prompt[:80])
+
+    # Create ONE event loop for the entire pipeline so the genai async HTTP
+    # client stays valid across all stages (script → code → review → compile).
+    _new_task_loop()
 
     try:
         # Guard: abort if video was deleted before worker picked it up
@@ -423,6 +466,7 @@ def run_pipeline(
         else:
             raise exc
     finally:
+        _close_task_loop()   # close the persistent loop cleanly
         db.close()
 
 
