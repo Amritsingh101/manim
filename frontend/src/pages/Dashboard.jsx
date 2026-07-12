@@ -81,7 +81,6 @@ function VideoCard({ video, i }) {
           style={{ padding: 0 }}
         >
           <div className="recent-video-thumb">
-            <span className={`badge ${statusClass} recent-video-badge`}>{video.status}</span>
             {(() => {
               const rawUrl = video.thumbnail_url || video.video_url;
               const thumbUrl = rawUrl ? rawUrl.replace(/\.[^/.]+$/, ".jpg") : null;
@@ -96,10 +95,16 @@ function VideoCard({ video, i }) {
                 </div>
               );
             })()}
-
           </div>
           <div className="recent-video-info">
-            <div className="recent-video-title">{video.title || video.prompt?.slice(0, 36) || 'Untitled'}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
+              <div className="recent-video-title" style={{ marginBottom: 0 }}>
+                {video.title || video.prompt?.slice(0, 36) || 'Untitled'}
+              </div>
+              <span className={`badge ${statusClass}`} style={{ fontSize: 9, padding: '2px 7px', flexShrink: 0 }}>
+                {video.status}
+              </span>
+            </div>
             <div className="recent-video-time">{formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}</div>
           </div>
         </motion.div>
