@@ -9,13 +9,44 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.models.video import Video
 from app.models.job import Job
 
+if settings.cloudinary_enabled:
+    import cloudinary
+    import cloudinary.utils
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET,
+        secure=True,
+    )
+
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/videos")
+
+
+def _derive_thumbnail(public_id: str) -> str | None:
+    """Derive a JPEG thumbnail URL for a Cloudinary video public_id."""
+    if not settings.cloudinary_enabled:
+        return None
+    try:
+        url, _ = cloudinary.utils.cloudinary_url(
+            public_id,
+            resource_type="video",
+            format="jpg",
+            transformation=[
+                {"width": 640, "height": 360, "crop": "fill", "start_offset": "3"},
+            ],
+            secure=True,
+        )
+        return url
+    except Exception:
+        return None
+
 
 
 class CreateVideoRequest(BaseModel):
@@ -201,6 +232,9 @@ async def _get_video_or_404(db: AsyncSession, video_id: str, user_id: str) -> Vi
 
 
 def _video_to_response(v: Video) -> VideoResponse:
+    thumb = v.thumbnail_url
+    if not thumb and v.cloudinary_public_id:
+        thumb = _derive_thumbnail(v.cloudinary_public_id)
     return VideoResponse(
         id=str(v.id),
         prompt=v.prompt,
@@ -211,7 +245,7 @@ def _video_to_response(v: Video) -> VideoResponse:
         description=v.description,
         duration_seconds=v.duration_seconds,
         video_url=v.video_url,
-        thumbnail_url=v.thumbnail_url,
+        thumbnail_url=thumb,
         error_message=v.error_message,
         compile_attempt=v.compile_attempt,
         created_at=v.created_at,
