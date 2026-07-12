@@ -2,136 +2,130 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Zap, Play, Sparkles, Code2, Film, ArrowRight, Check } from 'lucide-react'
 
+/* Solid icon colors — no gradient backgrounds */
+const FEATURE_COLORS = {
+  purple: '#6B5CE7',
+  teal:   '#0D9488',
+  amber:  '#D97706',
+  rose:   '#E11D48',
+}
+
 const features = [
-  {
-    icon: Sparkles, title: 'AI Script Generation',
-    desc: 'Gemini Flash transforms your topic into a detailed educational brief with scene-by-scene breakdown.',
-    gradient: 'var(--purple), #6366f1',
-  },
-  {
-    icon: Code2, title: 'Smart Code Generation',
-    desc: 'Gemini 2.5 Pro writes complete, runnable Manim CE Python code with beautiful animations.',
-    gradient: 'var(--teal), var(--teal-light)',
-  },
-  {
-    icon: Zap, title: 'Smart Retry Pipeline',
-    desc: 'Compilation errors are automatically classified and fixed — resume from the failed stage, not from scratch.',
-    gradient: 'var(--gold), #fb923c',
-  },
-  {
-    icon: Film, title: 'Cloud Delivery',
-    desc: 'Videos are rendered and uploaded to Cloudinary with auto-generated thumbnails.',
-    gradient: 'var(--rose), #f97316',
-  },
+  { icon: Sparkles, title: 'AI Script Generation',   color: FEATURE_COLORS.purple,
+    desc: 'Gemini Flash transforms your topic into a detailed educational brief with scene-by-scene breakdown.' },
+  { icon: Code2,    title: 'Smart Code Generation',   color: FEATURE_COLORS.teal,
+    desc: 'Gemini 2.5 Pro writes complete, runnable Manim CE Python code with beautiful animations.' },
+  { icon: Zap,      title: 'Smart Retry Pipeline',    color: FEATURE_COLORS.amber,
+    desc: 'Compilation errors are automatically classified and fixed — resume from the failed stage, not from scratch.' },
+  { icon: Film,     title: 'Cloud Delivery',           color: FEATURE_COLORS.rose,
+    desc: 'Videos are rendered and uploaded to Cloudinary with auto-generated thumbnails.' },
 ]
 
 const pipeline = [
-  { n: '01', title: 'Prompt Detailing', model: 'Flash', desc: 'Expands your idea into a rich educational brief' },
+  { n: '01', title: 'Prompt Detailing', model: 'Flash',   desc: 'Expands your idea into a rich educational brief' },
   { n: '02', title: 'Code Generation',  model: '2.5 Pro', desc: 'Generates complete Manim animation code' },
-  { n: '03', title: 'Code Review',      model: 'Flash', desc: 'Fixes API mistakes and syntax errors' },
-  { n: '04', title: 'Compilation',      model: 'Manim', desc: 'Renders the video with smart error recovery' },
+  { n: '03', title: 'Code Review',      model: 'Flash',   desc: 'Fixes API mistakes and syntax errors' },
+  { n: '04', title: 'Compilation',      model: 'Manim',   desc: 'Renders the video with smart error recovery' },
 ]
+
+const MODEL_STYLE = (model) => model === '2.5 Pro'
+  ? { background: 'rgba(217,119,6,0.12)', color: 'var(--gold-light)', border: '1px solid rgba(217,119,6,0.25)' }
+  : { background: 'rgba(13,148,136,0.12)', color: 'var(--teal-light)', border: '1px solid rgba(13,148,136,0.25)' }
 
 export default function Landing() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
+
       {/* Navbar */}
       <nav className="glass" style={{
         position: 'sticky', top: 0, zIndex: 100,
-        padding: '16px 0', borderBottom: '1px solid var(--border)',
+        padding: '14px 0', borderBottom: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-xs)',
       }}>
         <div className="container flex items-center justify-between">
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <div style={{
-              width: 36, height: 36, borderRadius: 9,
-              background: 'linear-gradient(135deg, var(--purple), var(--teal))',
+              width: 34, height: 34, borderRadius: 9,
+              background: 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: 'var(--shadow-sm)',
             }}>
-              <Zap size={20} color="white" />
+              <Zap size={18} color="white" />
             </div>
-            <span style={{ fontWeight: 800, fontSize: 20, color: 'var(--text-primary)' }}>ManimAI</span>
+            <span style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>ManimAI</span>
           </Link>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <Link to="/auth/login" className="btn btn-ghost btn-sm">Sign in</Link>
             <Link to="/auth/register" className="btn btn-primary btn-sm">
-              Get Started <ArrowRight size={14} />
+              Get Started <ArrowRight size={13} />
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ padding: '100px 0 80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        {/* Background glow */}
-        <div style={{
-          position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 600, height: 400, borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(139,92,246,0.12), transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-
+      <section style={{ padding: '90px 0 72px', textAlign: 'center', position: 'relative' }}>
         <div className="container" style={{ position: 'relative' }}>
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.55 }}
           >
+            {/* Pill badge */}
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '6px 16px', borderRadius: 99, marginBottom: 28,
-              background: 'rgba(139,92,246,0.12)',
-              border: '1px solid rgba(139,92,246,0.3)',
-              fontSize: 13, color: 'var(--purple-light)', fontWeight: 600,
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              padding: '5px 14px', borderRadius: '99px', marginBottom: 24,
+              background: 'var(--accent-subtle)',
+              border: '1px solid rgba(107,92,231,0.25)',
+              fontSize: 12, color: 'var(--accent-text)', fontWeight: 600,
+              boxShadow: 'var(--shadow-xs)',
             }}>
-              <Sparkles size={14} /> Powered by Gemini 2.5 Pro + Gemini Flash
+              <Sparkles size={12} /> Powered by Gemini 2.5 Pro + Gemini Flash
             </div>
 
-            <h1 style={{ fontSize: 'clamp(40px, 7vw, 80px)', fontWeight: 900, marginBottom: 24, lineHeight: 1.05 }}>
+            <h1 style={{ fontSize: 'clamp(36px, 6.5vw, 72px)', fontWeight: 900, marginBottom: 22, lineHeight: 1.07 }}>
               Turn any topic into a<br />
-              <span className="gradient-text">stunning animation</span>
+              <span style={{ color: 'var(--accent-text)' }}>stunning animation</span>
             </h1>
 
-            <p style={{ fontSize: 18, color: 'var(--text-secondary)', maxWidth: 560, margin: '0 auto 40px', lineHeight: 1.7 }}>
+            <p style={{ fontSize: 17, color: 'var(--text-secondary)', maxWidth: 540, margin: '0 auto 36px', lineHeight: 1.72 }}>
               Describe any mathematical or educational concept.
               ManimAI generates beautiful, professional-quality Manim videos — fully automated.
             </p>
 
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link to="/auth/register" className="btn btn-primary btn-lg">
-                <Zap size={18} /> Start Creating Free
+                <Zap size={16} /> Start Creating Free
               </Link>
               <a href="#pipeline" className="btn btn-secondary btn-lg">
-                <Play size={18} /> See How It Works
+                <Play size={16} /> See How It Works
               </a>
             </div>
           </motion.div>
 
-          {/* Demo prompt card */}
+          {/* Demo card */}
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            initial={{ opacity: 0, y: 36, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            style={{
-              maxWidth: 600, margin: '60px auto 0',
-              background: 'var(--bg-card)', border: '1px solid var(--border)',
-              borderRadius: 16, padding: '20px 24px', textAlign: 'left',
-              boxShadow: '0 0 80px rgba(139,92,246,0.1)',
-            }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+            className="card"
+            style={{ maxWidth: 580, margin: '52px auto 0', textAlign: 'left' }}
           >
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, fontFamily: 'monospace' }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
               Prompt
             </div>
-            <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 20 }}>
+            <div style={{ fontSize: 15, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 18, lineHeight: 1.6 }}>
               "Explain the Fourier Transform visually, showing how any signal can be decomposed into sine waves"
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
               {pipeline.map((s, i) => (
                 <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px',
-                  borderRadius: 6, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)',
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '3px 9px',
+                  borderRadius: 6, background: 'rgba(22,163,74,0.08)',
+                  border: '1px solid rgba(22,163,74,0.2)',
                 }}>
-                  <Check size={12} color="var(--success)" />
-                  <span style={{ fontSize: 12, color: 'var(--success)' }}>{s.title}</span>
+                  <Check size={11} color="var(--success)" />
+                  <span style={{ fontSize: 11, color: 'var(--success)', fontWeight: 600 }}>{s.title}</span>
                 </div>
               ))}
             </div>
@@ -140,34 +134,30 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section style={{ padding: '80px 0', background: 'var(--bg-surface)' }}>
+      <section style={{ padding: '72px 0', background: 'var(--bg-surface)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <h2 style={{ fontSize: 40, marginBottom: 12 }}>Everything you need</h2>
-            <p style={{ fontSize: 16, color: 'var(--text-secondary)' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontSize: 36, marginBottom: 10 }}>Everything you need</h2>
+            <p style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
               A complete AI pipeline from idea to polished video
             </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
-            {features.map(({ icon: Icon, title, desc, gradient }, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+            {features.map(({ icon: Icon, title, desc, color }, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.09 }}
                 className="card"
-                style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
               >
-                <div style={{
-                  width: 44, height: 44, borderRadius: 10,
-                  background: `linear-gradient(135deg, ${gradient})`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Icon size={22} color="white" />
+                <div className="landing-feature-icon" style={{ background: color }}>
+                  <Icon size={20} color="white" />
                 </div>
-                <h3 style={{ fontSize: 17, fontWeight: 700 }}>{title}</h3>
-                <p style={{ fontSize: 14, lineHeight: 1.6 }}>{desc}</p>
+                <h3 style={{ fontSize: 16, fontWeight: 700 }}>{title}</h3>
+                <p style={{ fontSize: 13, lineHeight: 1.65, margin: 0 }}>{desc}</p>
               </motion.div>
             ))}
           </div>
@@ -175,37 +165,36 @@ export default function Landing() {
       </section>
 
       {/* Pipeline */}
-      <section id="pipeline" style={{ padding: '80px 0' }}>
+      <section id="pipeline" style={{ padding: '72px 0' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <h2 style={{ fontSize: 40, marginBottom: 12 }}>4-Stage AI Pipeline</h2>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontSize: 36, marginBottom: 10 }}>4-Stage AI Pipeline</h2>
             <p style={{ color: 'var(--text-secondary)' }}>
               Each stage uses the right model — fast for simple tasks, powerful for code
             </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {pipeline.map(({ n, title, model, desc }, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.09 }}
                 className="card"
               >
-                <div style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--purple)', marginBottom: 10, fontWeight: 700 }}>
+                <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--accent-text)', marginBottom: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Stage {n}
                 </div>
-                <h3 style={{ fontSize: 16, marginBottom: 8 }}>{title}</h3>
+                <h3 style={{ fontSize: 15, marginBottom: 8, fontWeight: 700 }}>{title}</h3>
                 <div style={{
-                  display: 'inline-block', padding: '3px 9px', borderRadius: 99, marginBottom: 10,
-                  fontSize: 11, fontWeight: 700,
-                  background: model === '2.5 Pro' ? 'rgba(245,158,11,0.15)' : 'rgba(20,184,166,0.15)',
-                  color: model === '2.5 Pro' ? 'var(--gold)' : 'var(--teal-light)',
+                  display: 'inline-block', padding: '3px 8px', borderRadius: 99, marginBottom: 10,
+                  fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                  ...MODEL_STYLE(model),
                 }}>
                   Gemini {model}
                 </div>
-                <p style={{ fontSize: 13 }}>{desc}</p>
+                <p style={{ fontSize: 13, margin: 0 }}>{desc}</p>
               </motion.div>
             ))}
           </div>
@@ -213,23 +202,21 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: '80px 0', background: 'var(--bg-surface)', textAlign: 'center' }}>
+      <section style={{ padding: '72px 0', background: 'var(--bg-surface)', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
         <div className="container">
-          <h2 style={{ fontSize: 40, marginBottom: 16 }}>
-            Ready to create?
-          </h2>
-          <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32 }}>
+          <h2 style={{ fontSize: 36, marginBottom: 14 }}>Ready to create?</h2>
+          <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 28 }}>
             Sign up free and generate your first video in minutes.
           </p>
           <Link to="/auth/register" className="btn btn-primary btn-lg">
-            <Zap size={18} /> Get Started for Free
+            <Zap size={16} /> Get Started for Free
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '32px 0', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+      <footer style={{ padding: '28px 0', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           ManimAI v2 · Built with Gemini 2.5 Pro + FastAPI + Manim CE
         </p>
       </footer>

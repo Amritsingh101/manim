@@ -89,7 +89,7 @@ export default function AuthCallback() {
     }}>
       <div style={{
         width: 56, height: 56, borderRadius: 14,
-        background: 'linear-gradient(135deg, var(--purple), var(--teal))',
+        background: 'var(--accent)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <Zap size={28} color="white" />

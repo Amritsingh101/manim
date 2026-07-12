@@ -5,16 +5,23 @@ import { useMe } from '../api/hooks'
 import { useVideos } from '../api/hooks'
 import { formatDistanceToNow } from 'date-fns'
 
-/* ── Compact stat chip ─────────────────────────────────────────────────────── */
-function StatChip({ value, label, icon: Icon, gradient, delay = 0 }) {
+/* Solid accent colors per stat — no gradients */
+const STAT_COLORS = {
+  purple: '#6B5CE7',
+  green:  '#16A34A',
+  teal:   '#0D9488',
+  amber:  '#D97706',
+}
+
+function StatChip({ value, label, icon: Icon, color, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 12 }}
+      initial={{ opacity: 0, scale: 0.92, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ delay, duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+      transition={{ delay, duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
       className="stat-chip"
     >
-      <div className="stat-chip-icon" style={{ background: gradient }}>
+      <div className="stat-chip-icon" style={{ background: color }}>
         <Icon size={14} color="white" />
       </div>
       <div className="stat-chip-value">{value}</div>
@@ -23,24 +30,22 @@ function StatChip({ value, label, icon: Icon, gradient, delay = 0 }) {
   )
 }
 
-/* ── Quick action card ─────────────────────────────────────────────────────── */
-function ActionCard({ to, icon: Icon, iconGradient, title, subtitle, delay = 0, accent }) {
+function ActionCard({ to, iconBg, icon: Icon, title, subtitle, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.38, ease: [0.23, 1, 0.32, 1] }}
+      transition={{ delay, duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
     >
       <Link to={to} style={{ textDecoration: 'none' }}>
         <motion.div
-          whileHover={{ y: -3, scale: 1.01 }}
+          whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.18 }}
+          transition={{ duration: 0.15 }}
           className="action-card"
-          style={{ '--accent': accent }}
         >
-          <div className="action-card-icon" style={{ background: iconGradient }}>
-            <Icon size={20} color="white" />
+          <div className="action-card-icon" style={{ background: iconBg }}>
+            <Icon size={19} color="white" />
           </div>
           <div className="action-card-body">
             <div className="action-card-title">{title}</div>
@@ -53,7 +58,6 @@ function ActionCard({ to, icon: Icon, iconGradient, title, subtitle, delay = 0, 
   )
 }
 
-/* ── Video card ────────────────────────────────────────────────────────────── */
 function VideoCard({ video, i }) {
   const statusClass = {
     completed: 'badge-completed',
@@ -64,42 +68,35 @@ function VideoCard({ video, i }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.05 + i * 0.07, duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+      transition={{ delay: 0.04 + i * 0.06, duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       className="recent-video-card"
     >
       <Link to={`/videos/${video.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
         <motion.div
           whileHover={{ y: -2 }}
-          transition={{ duration: 0.18 }}
+          transition={{ duration: 0.15 }}
           className="card recent-video-inner"
+          style={{ padding: 0 }}
         >
-          {/* Thumbnail */}
           <div className="recent-video-thumb">
             {video.thumbnail_url
               ? <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : (
                 <div className="recent-video-thumb-placeholder">
-                  <Film size={28} color="var(--purple-light)" opacity={0.5} />
+                  <Film size={24} color="var(--text-muted)" opacity={0.6} />
                   {(video.status === 'pending' || video.status === 'processing') && (
-                    <div className="thumb-processing-bar">
-                      <div className="thumb-processing-fill" />
-                    </div>
+                    <div className="thumb-processing-bar"><div className="thumb-processing-fill" /></div>
                   )}
                 </div>
               )
             }
             <span className={`badge ${statusClass} recent-video-badge`}>{video.status}</span>
           </div>
-          {/* Info */}
           <div className="recent-video-info">
-            <div className="recent-video-title">
-              {video.title || video.prompt?.slice(0, 38) || 'Untitled'}
-            </div>
-            <div className="recent-video-time">
-              {formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}
-            </div>
+            <div className="recent-video-title">{video.title || video.prompt?.slice(0, 36) || 'Untitled'}</div>
+            <div className="recent-video-time">{formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}</div>
           </div>
         </motion.div>
       </Link>
@@ -107,7 +104,6 @@ function VideoCard({ video, i }) {
   )
 }
 
-/* ── Dashboard ─────────────────────────────────────────────────────────────── */
 export default function Dashboard() {
   const { data: user } = useMe()
   const { data: videos = [], isLoading } = useVideos({ limit: 10 })
@@ -128,108 +124,58 @@ export default function Dashboard() {
   return (
     <div className="dashboard-root">
 
-      {/* ── Welcome ──────────────────────────────────────────────────────── */}
+      {/* Welcome */}
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.35 }}
         className="dashboard-welcome"
       >
-        {/* Ambient glow blob */}
         <div className="welcome-glow" aria-hidden />
-        <div className="welcome-text">
-          <h1 className="welcome-heading">
-            {greeting()}, <span className="gradient-text">{firstName}</span> 👋
-          </h1>
-          <p className="welcome-sub">
-            <Sparkles size={13} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
-            AI-powered Manim animations, ready in minutes.
-          </p>
-        </div>
+        <h1 className="welcome-heading">
+          {greeting()}, <span style={{ color: 'var(--accent-text)' }}>{firstName}</span> 👋
+        </h1>
+        <p className="welcome-sub">
+          <Sparkles size={12} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle', color: 'var(--accent-text)' }} />
+          AI-powered Manim animations, ready in minutes.
+        </p>
       </motion.div>
 
-      {/* ── Stats row — 2×2 compact grid ─────────────────────────────────── */}
+      {/* Stats */}
       <div className="stats-grid">
-        <StatChip
-          delay={0.06}
-          value={videos.length}
-          label="Total Videos"
-          icon={Film}
-          gradient="linear-gradient(135deg, #8b5cf6, #7c3aed)"
-        />
-        <StatChip
-          delay={0.10}
-          value={completed}
-          label="Completed"
-          icon={CheckCircle2}
-          gradient="linear-gradient(135deg, #22c55e, #16a34a)"
-        />
-        <StatChip
-          delay={0.14}
-          value={processing}
-          label="Processing"
-          icon={Zap}
-          gradient="linear-gradient(135deg, #14b8a6, #2dd4bf)"
-        />
-        <StatChip
-          delay={0.18}
-          value={totalSecs > 0 ? `${totalSecs}s` : '—'}
-          label="Duration"
-          icon={TrendingUp}
-          gradient="linear-gradient(135deg, #f59e0b, #d97706)"
-        />
+        <StatChip delay={0.06} value={videos.length} label="Total"      icon={Film}         color={STAT_COLORS.purple} />
+        <StatChip delay={0.10} value={completed}      label="Completed"  icon={CheckCircle2} color={STAT_COLORS.green}  />
+        <StatChip delay={0.13} value={processing}     label="Processing" icon={Zap}          color={STAT_COLORS.teal}   />
+        <StatChip delay={0.16} value={totalSecs > 0 ? `${totalSecs}s` : '—'} label="Duration" icon={TrendingUp} color={STAT_COLORS.amber} />
       </div>
 
-      {/* ── Quick actions — always 2-column ──────────────────────────────── */}
+      {/* Quick actions — always 2 col */}
       <div className="quick-actions-grid">
-        <ActionCard
-          delay={0.22}
-          to="/create"
-          icon={PlusCircle}
-          iconGradient="linear-gradient(135deg, var(--purple), var(--teal))"
-          title="Create Video"
-          subtitle="Script → Code → Render"
-          accent="rgba(139,92,246,0.35)"
-        />
-        <ActionCard
-          delay={0.26}
-          to="/history"
-          icon={Film}
-          iconGradient="linear-gradient(135deg, #f59e0b, #d97706)"
-          title="Browse Videos"
-          subtitle="All your animations"
-          accent="rgba(245,158,11,0.35)"
-        />
+        <ActionCard delay={0.20} to="/create"  iconBg={STAT_COLORS.purple} icon={PlusCircle} title="Create Video"  subtitle="Script → Code → Render" />
+        <ActionCard delay={0.24} to="/history" iconBg={STAT_COLORS.amber}  icon={Film}        title="Browse Videos" subtitle="All your animations"    />
       </div>
 
-      {/* ── Recent Videos ─────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="recent-section"
-      >
+      {/* Recent Videos */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28 }} className="recent-section">
         <div className="recent-header">
           <h2 className="recent-title">Recent Videos</h2>
-          <Link to="/history" className="recent-viewall">View all <ArrowRight size={12} /></Link>
+          <Link to="/history" className="recent-viewall">
+            View all <ArrowRight size={11} />
+          </Link>
         </div>
 
         {isLoading && (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '28px 0' }}>
             <div className="spinner" />
           </div>
         )}
 
         {!isLoading && videos.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card empty-state"
-          >
-            <Film size={36} color="var(--text-muted)" style={{ marginBottom: 12 }} />
-            <p style={{ marginBottom: 16 }}>No videos yet — create your first one!</p>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card empty-state">
+            <Film size={34} color="var(--text-muted)" style={{ marginBottom: 10 }} />
+            <p style={{ marginBottom: 14 }}>No videos yet — create your first one!</p>
             <Link to="/create" className="btn btn-primary btn-sm">
-              <PlusCircle size={14} /> Create Video
+              <PlusCircle size={13} /> Create Video
             </Link>
           </motion.div>
         )}
@@ -237,9 +183,7 @@ export default function Dashboard() {
         {!isLoading && videos.length > 0 && (
           <div className="recent-scroll-track">
             <div className="recent-scroll-inner">
-              {videos.map((video, i) => (
-                <VideoCard key={video.id} video={video} i={i} />
-              ))}
+              {videos.map((video, i) => <VideoCard key={video.id} video={video} i={i} />)}
             </div>
           </div>
         )}

@@ -33,7 +33,7 @@ export default function Settings() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
           <div style={{
             width: 60, height: 60, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg, var(--purple), var(--teal))',
+            background: 'var(--accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 22, fontWeight: 800, color: 'white', overflow: 'hidden',
           }}>

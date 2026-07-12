@@ -29,10 +29,8 @@ export default function AuthPage() {
         res = await authApi.login({ email: form.email, password: form.password })
       } else {
         res = await authApi.register({
-          email: form.email,
-          password: form.password,
-          username: form.username,
-          full_name: form.full_name || undefined,
+          email: form.email, password: form.password,
+          username: form.username, full_name: form.full_name || undefined,
         })
       }
       login(res.data.access_token, res.data.refresh_token)
@@ -41,9 +39,7 @@ export default function AuthPage() {
     } catch (err) {
       const msg = err.response?.data?.detail || 'Authentication failed'
       toast.error(Array.isArray(msg) ? msg[0]?.msg || 'Validation error' : msg)
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   const handleOAuth = async (provider) => {
@@ -51,9 +47,7 @@ export default function AuthPage() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
       if (error) toast.error(error.message)
     } catch {
@@ -62,77 +56,72 @@ export default function AuthPage() {
     }
   }
 
+  const ICON_STYLE = { position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }
+
   return (
     <div style={{
       minHeight: '100vh', background: 'var(--bg-base)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '24px', position: 'relative',
+      padding: '24px',
     }}>
-      {/* Gradient background */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse at 20% 20%, rgba(139,92,246,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(20,184,166,0.06) 0%, transparent 50%)',
-      }} />
-
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        initial={{ opacity: 0, y: 18, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        style={{ width: '100%', maxWidth: 420, position: 'relative' }}
+        transition={{ duration: 0.38 }}
+        style={{ width: '100%', maxWidth: 400 }}
       >
-        {/* Back to home */}
-        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 24, fontSize: 13, color: 'var(--text-secondary)' }}>
-          <ArrowLeft size={14} /> Back to home
+        {/* Back link */}
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13, color: 'var(--text-secondary)' }}>
+          <ArrowLeft size={13} /> Back to home
         </Link>
 
-        <div className="card" style={{ padding: 32 }}>
+        <div className="card" style={{ padding: 28 }}>
           {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 9,
-              background: 'linear-gradient(135deg, var(--purple), var(--teal))',
+              background: 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: 'var(--shadow-sm)', flexShrink: 0,
             }}>
-              <Zap size={20} color="white" />
+              <Zap size={18} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 20, fontWeight: 800 }}>ManimAI</h1>
+              <h1 style={{ fontSize: 19, fontWeight: 800 }}>ManimAI</h1>
               <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
                 {isLogin ? 'Welcome back' : 'Create your account'}
               </p>
             </div>
           </div>
 
-          {/* OAuth buttons */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-            <button
-              onClick={() => handleOAuth('google')}
-              disabled={!!oauthLoading}
-              className="btn btn-secondary w-full"
-              style={{ justifyContent: 'center' }}
-            >
-              {oauthLoading === 'google' ? <div className="spinner" /> : <Globe size={16} />}
-              Google
-            </button>
-            <button
-              onClick={() => handleOAuth('github')}
-              disabled={!!oauthLoading}
-              className="btn btn-secondary w-full"
-              style={{ justifyContent: 'center' }}
-            >
-              {oauthLoading === 'github' ? <div className="spinner" /> : <GitFork size={16} />}
-              GitHub
-            </button>
+          {/* OAuth */}
+          <div style={{ display: 'flex', gap: 9, marginBottom: 20 }}>
+            {[
+              { provider: 'google',  Icon: Globe,    label: 'Google' },
+              { provider: 'github',  Icon: GitFork,  label: 'GitHub' },
+            ].map(({ provider, Icon, label }) => (
+              <button
+                key={provider}
+                onClick={() => handleOAuth(provider)}
+                disabled={!!oauthLoading}
+                className="btn btn-secondary w-full"
+                style={{ justifyContent: 'center', flex: 1 }}
+              >
+                {oauthLoading === provider ? <div className="spinner" /> : <Icon size={15} />}
+                {label}
+              </button>
+            ))}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>or with email</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>or with email</span>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
             <AnimatePresence>
               {!isLogin && (
                 <motion.div
@@ -143,18 +132,10 @@ export default function AuthPage() {
                 >
                   <label className="label">Username</label>
                   <div style={{ position: 'relative' }}>
-                    <User size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input
-                      className="input"
-                      style={{ paddingLeft: 36 }}
-                      placeholder="yourname"
-                      value={form.username}
-                      onChange={set('username')}
-                      required={!isLogin}
-                      minLength={3}
-                      maxLength={40}
-                      pattern="^[a-zA-Z0-9_]+$"
-                    />
+                    <User size={14} style={ICON_STYLE} />
+                    <input className="input" style={{ paddingLeft: 36 }} placeholder="yourname"
+                      value={form.username} onChange={set('username')}
+                      required={!isLogin} minLength={3} maxLength={40} pattern="^[a-zA-Z0-9_]+$" />
                   </div>
                 </motion.div>
               )}
@@ -162,7 +143,7 @@ export default function AuthPage() {
 
             {!isLogin && (
               <div className="form-group">
-                <label className="label">Full Name (optional)</label>
+                <label className="label">Full Name <span style={{ color: 'var(--text-muted)' }}>(optional)</span></label>
                 <input className="input" placeholder="Your Name" value={form.full_name} onChange={set('full_name')} />
               </div>
             )}
@@ -170,53 +151,37 @@ export default function AuthPage() {
             <div className="form-group">
               <label className="label">Email</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input
-                  className="input"
-                  style={{ paddingLeft: 36 }}
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={set('email')}
-                  required
-                />
+                <Mail size={14} style={ICON_STYLE} />
+                <input className="input" style={{ paddingLeft: 36 }} type="email"
+                  placeholder="you@example.com" value={form.email} onChange={set('email')} required />
               </div>
             </div>
 
             <div className="form-group">
               <label className="label">Password</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input
-                  className="input"
-                  style={{ paddingLeft: 36, paddingRight: 40 }}
+                <Lock size={14} style={ICON_STYLE} />
+                <input className="input" style={{ paddingLeft: 36, paddingRight: 40 }}
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={set('password')}
-                  required
-                  minLength={8}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
-                >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  placeholder="••••••••" value={form.password} onChange={set('password')}
+                  required minLength={8} />
+                <button type="button" onClick={() => setShowPassword((p) => !p)}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}>
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
             </div>
 
             <button type="submit" disabled={loading} className="btn btn-primary w-full" style={{ justifyContent: 'center', marginTop: 4 }}>
-              {loading ? <div className="spinner" /> : <Zap size={16} />}
+              {loading ? <div className="spinner" /> : <Zap size={15} />}
               {loading ? 'Please wait…' : isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
           {/* Toggle */}
-          <p style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-secondary)' }}>
+          <p style={{ textAlign: 'center', marginTop: 18, fontSize: 13, color: 'var(--text-secondary)' }}>
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <Link to={isLogin ? '/auth/register' : '/auth/login'} style={{ color: 'var(--purple-light)', fontWeight: 600 }}>
+            <Link to={isLogin ? '/auth/register' : '/auth/login'} style={{ color: 'var(--accent-text)', fontWeight: 700 }}>
               {isLogin ? 'Sign up' : 'Sign in'}
             </Link>
           </p>

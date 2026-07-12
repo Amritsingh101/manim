@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, PlusCircle, Film, Settings, LogOut, Zap, Menu, X } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, Film, Settings, LogOut, Zap, Menu, X, Moon, Sun } from 'lucide-react'
 import { useAuthStore } from '../stores/authStore'
+import { useThemeStore } from '../stores/themeStore'
 import { authApi } from '../api/client'
 import { useState } from 'react'
 
@@ -14,23 +15,41 @@ const nav = [
 
 function NavItem({ to, icon: Icon, label, active, onClick }) {
   return (
-    <Link to={to} style={{ textDecoration: 'none' }} onClick={onClick}>
-      <motion.div
-        whileHover={{ x: 2 }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '10px 12px', borderRadius: 10, marginBottom: 4,
-          background: active ? 'rgba(139,92,246,0.15)' : 'transparent',
-          color: active ? 'var(--purple-light)' : 'var(--text-secondary)',
-          fontWeight: active ? 600 : 400, fontSize: 14,
-          transition: 'all var(--transition)',
-          borderLeft: active ? '2px solid var(--purple)' : '2px solid transparent',
-        }}
-      >
-        <Icon size={18} />
-        {label}
-      </motion.div>
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`sidebar-nav-item${active ? ' active' : ''}`}
+    >
+      <Icon size={16} />
+      <span>{label}</span>
+      <span className="nav-dot" />
     </Link>
+  )
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useThemeStore()
+  const isLight = theme === 'light'
+  return (
+    <button
+      onClick={toggleTheme}
+      aria-label="Toggle theme"
+      title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 7,
+        padding: '6px 10px', borderRadius: 'var(--radius-sm)',
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        color: 'var(--text-secondary)', cursor: 'pointer',
+        fontSize: 12, fontWeight: 600,
+        boxShadow: 'var(--shadow-xs)',
+        transition: 'all var(--t-fast)',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-hover)'; e.currentTarget.style.color = 'var(--text-primary)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+    >
+      {isLight ? <Moon size={13} /> : <Sun size={13} />}
+      {isLight ? 'Dark' : 'Light'}
+    </button>
   )
 }
 
@@ -43,154 +62,143 @@ export default function Layout({ children }) {
     try { await authApi.logout() } catch {}
     logout()
   }
-
   const closeMobile = () => setMobileMenuOpen(false)
+  const initial = (user?.full_name || user?.username || '?')[0]?.toUpperCase()
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* ── Desktop Sidebar ─────────────────────────────────────────────────── */}
+
+      {/* ── Desktop Sidebar ──────────────────────────────────────────────── */}
       <aside className="sidebar-desktop">
         {/* Logo */}
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border)' }}>
-          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 8,
-              background: 'linear-gradient(135deg, var(--purple), var(--teal))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Zap size={18} color="white" />
+        <div className="sidebar-logo">
+          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flex: 1 }}>
+            <div className="sidebar-logo-icon">
+              <Zap size={17} color="white" />
             </div>
-            <span style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-primary)' }}>ManimAI</span>
+            <span style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              ManimAI
+            </span>
           </Link>
+          <ThemeToggle />
         </div>
 
         {/* Navigation */}
-        <nav style={{ flex: 1, padding: '16px 12px' }}>
+        <nav className="sidebar-nav">
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 12px 8px', marginBottom: 2 }}>
+            Menu
+          </div>
           {nav.map(({ to, icon, label }) => {
             const active = pathname === to || (to !== '/dashboard' && pathname.startsWith(to))
             return <NavItem key={to} to={to} icon={icon} label={label} active={active} />
           })}
         </nav>
 
-        {/* User + Logout */}
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border)' }}>
+        {/* Footer */}
+        <div className="sidebar-footer">
           {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--purple), var(--teal))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 13, fontWeight: 700, color: 'white', flexShrink: 0,
-                overflow: 'hidden',
-              }}>
+            <div className="sidebar-user">
+              <div className="sidebar-avatar">
                 {user.avatar_url
-                  ? <img src={user.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
-                  : (user.full_name || user.username || '?')[0].toUpperCase()
+                  ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : initial
                 }
               </div>
-              <div style={{ overflow: 'hidden' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ overflow: 'hidden', flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user.full_name || user.username}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user.email}
                 </div>
               </div>
             </div>
           )}
-          <button onClick={handleLogout} className="btn btn-ghost btn-sm w-full" style={{ justifyContent: 'flex-start' }}>
-            <LogOut size={15} /> Sign out
+          <button
+            onClick={handleLogout}
+            className="btn btn-ghost btn-sm w-full"
+            style={{ justifyContent: 'flex-start', fontSize: 13 }}
+          >
+            <LogOut size={14} /> Sign out
           </button>
         </div>
       </aside>
 
-      {/* ── Mobile Header ───────────────────────────────────────────────────── */}
+      {/* ── Mobile Header ────────────────────────────────────────────────── */}
       <header className="mobile-header">
         <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: 7,
-            background: 'linear-gradient(135deg, var(--purple), var(--teal))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Zap size={15} color="white" />
+          <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-xs)' }}>
+            <Zap size={14} color="white" />
           </div>
-          <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)' }}>ManimAI</span>
+          <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>ManimAI</span>
         </Link>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="btn btn-ghost btn-icon"
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ThemeToggle />
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="btn btn-ghost btn-icon"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
+          </button>
+        </div>
       </header>
 
-      {/* ── Mobile Slide-down Menu ──────────────────────────────────────────── */}
+      {/* ── Mobile Slide-down Menu ───────────────────────────────────────── */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.18 }}
-            className="mobile-menu"
-          >
-            <div style={{ padding: '8px 12px' }}>
-              {nav.map(({ to, icon, label }) => {
-                const active = pathname === to || (to !== '/dashboard' && pathname.startsWith(to))
-                return <NavItem key={to} to={to} icon={icon} label={label} active={active} onClick={closeMobile} />
-              })}
-            </div>
-            {user && (
-              <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%', overflow: 'hidden',
-                    background: 'linear-gradient(135deg, var(--purple), var(--teal))',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0,
-                  }}>
-                    {user.avatar_url
-                      ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : (user.full_name || user.username || '?')[0].toUpperCase()
-                    }
-                  </div>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{user.full_name || user.username}</span>
-                </div>
-                <button onClick={handleLogout} className="btn btn-ghost btn-sm">
-                  <LogOut size={14} /> Sign out
-                </button>
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.16 }}
+              className="mobile-menu"
+              style={{ zIndex: 101 }}
+            >
+              <div style={{ padding: '8px 10px' }}>
+                {nav.map(({ to, icon, label }) => {
+                  const active = pathname === to || (to !== '/dashboard' && pathname.startsWith(to))
+                  return <NavItem key={to} to={to} icon={icon} label={label} active={active} onClick={closeMobile} />
+                })}
               </div>
-            )}
-          </motion.div>
+              {user && (
+                <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="sidebar-avatar" style={{ width: 26, height: 26, fontSize: 11 }}>
+                      {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{user.full_name || user.username}</span>
+                  </div>
+                  <button onClick={handleLogout} className="btn btn-ghost btn-sm">
+                    <LogOut size={13} /> Sign out
+                  </button>
+                </div>
+              )}
+            </motion.div>
+            {/* Backdrop */}
+            <div
+              onClick={closeMobile}
+              style={{ position: 'fixed', inset: 0, zIndex: 99, background: 'var(--bg-overlay)', top: 56 }}
+            />
+          </>
         )}
       </AnimatePresence>
 
-      {/* Overlay for mobile menu */}
-      {mobileMenuOpen && (
-        <div
-          onClick={closeMobile}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 99,
-            background: 'rgba(0,0,0,0.4)',
-            top: 57, // below mobile header
-          }}
-        />
-      )}
-
-      {/* ── Main content ─────────────────────────────────────────────────────── */}
+      {/* ── Main Content ─────────────────────────────────────────────────── */}
       <main className="main-content">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          key={pathname}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
           className="main-inner"
         >
           {children}
         </motion.div>
       </main>
 
-      {/* ── Mobile Bottom Navigation ─────────────────────────────────────────── */}
+      {/* ── Mobile Bottom Nav ─────────────────────────────────────────────── */}
       <nav className="mobile-bottom-nav">
         {nav.map(({ to, icon: Icon, label }) => {
           const active = pathname === to || (to !== '/dashboard' && pathname.startsWith(to))
@@ -199,11 +207,12 @@ export default function Layout({ children }) {
               <div style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 gap: 3, padding: '8px 4px',
-                color: active ? 'var(--purple-light)' : 'var(--text-muted)',
-                transition: 'color var(--transition)',
+                color: active ? 'var(--accent-text)' : 'var(--text-muted)',
+                transition: 'color var(--t-fast)',
               }}>
-                <Icon size={20} />
-                <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{label}</span>
+                <Icon size={19} />
+                <span style={{ fontSize: 9.5, fontWeight: active ? 700 : 400, letterSpacing: '0.02em' }}>{label}</span>
+                {active && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--accent)', marginTop: 1 }} />}
               </div>
             </Link>
           )

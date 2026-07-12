@@ -21,7 +21,7 @@ function VideoCard({ video, i }) {
           {/* Thumbnail */}
           <div className="history-thumbnail" style={{
             width: 120, height: 72, borderRadius: 8, flexShrink: 0,
-            background: video.thumbnail_url ? 'transparent' : 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(20,184,166,0.2))',
+            background: video.thumbnail_url ? 'transparent' : 'var(--accent-subtle)',
             overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {video.thumbnail_url
