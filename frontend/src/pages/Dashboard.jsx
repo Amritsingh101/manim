@@ -8,9 +8,9 @@ import { formatDistanceToNow } from 'date-fns'
 /* Solid accent colors per stat — no gradients */
 const STAT_COLORS = {
   purple: '#6B5CE7',
-  green:  '#16A34A',
-  teal:   '#0D9488',
-  amber:  '#D97706',
+  green: '#16A34A',
+  teal: '#0D9488',
+  amber: '#D97706',
 }
 
 function StatChip({ value, label, icon: Icon, color, delay = 0 }) {
@@ -111,9 +111,9 @@ export default function Dashboard() {
   const { data: user } = useMe()
   const { data: videos = [], isLoading } = useVideos({ limit: 10 })
 
-  const completed  = videos.filter((v) => v.status === 'completed').length
+  const completed = videos.filter((v) => v.status === 'completed').length
   const processing = videos.filter((v) => ['pending', 'processing'].includes(v.status)).length
-  const totalSecs  = videos.reduce((a, v) => a + (v.duration_seconds || 0), 0)
+  const totalSecs = videos.reduce((a, v) => a + (v.duration_seconds || 0), 0)
 
   const greeting = () => {
     const h = new Date().getHours()
@@ -146,16 +146,16 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="stats-grid">
-        <StatChip delay={0.06} value={videos.length} label="Total"      icon={Film}         color={STAT_COLORS.purple} />
-        <StatChip delay={0.10} value={completed}      label="Completed"  icon={CheckCircle2} color={STAT_COLORS.green}  />
-        <StatChip delay={0.13} value={processing}     label="Processing" icon={Zap}          color={STAT_COLORS.teal}   />
+        <StatChip delay={0.06} value={videos.length} label="Total" icon={Film} color={STAT_COLORS.purple} />
+        <StatChip delay={0.10} value={completed} label="Completed" icon={CheckCircle2} color={STAT_COLORS.green} />
+        <StatChip delay={0.13} value={processing} label="Processing" icon={Zap} color={STAT_COLORS.teal} />
         <StatChip delay={0.16} value={totalSecs > 0 ? `${totalSecs}s` : '—'} label="Duration" icon={TrendingUp} color={STAT_COLORS.amber} />
       </div>
 
       {/* Quick actions — always 2 col */}
       <div className="quick-actions-grid">
-        <ActionCard delay={0.20} to="/create"  iconBg={STAT_COLORS.purple} icon={PlusCircle} title="Create Video"  subtitle="Script → Code → Render" />
-        <ActionCard delay={0.24} to="/history" iconBg={STAT_COLORS.amber}  icon={Film}        title="Browse Videos" subtitle="All your animations"    />
+        <ActionCard delay={0.20} to="/create" iconBg={STAT_COLORS.purple} icon={PlusCircle} title="Create Video" subtitle="" />
+        <ActionCard delay={0.24} to="/history" iconBg={STAT_COLORS.amber} icon={Film} title="Browse Videos" subtitle="" />
       </div>
 
       {/* Recent Videos */}
