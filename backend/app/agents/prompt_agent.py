@@ -32,7 +32,7 @@ You MUST return valid JSON with this exact schema:
     {"term": "Concept name", "definition": "Clear, concise definition (max 150 chars)"},
     ...
   ],
-  "duration_seconds": <integer between 45 and 180>,
+  "duration_seconds": <integer — MUST be very close to the TARGET DURATION given by the user; only deviate by ±15% at most if content absolutely requires it>,
   "narration_script": "Full narration text with [VISUAL: description] cues embedded at every scene transition. Be specific about what should appear visually.",
   "scenes": [
     {
@@ -77,7 +77,7 @@ async def run_prompt_agent(
 
 TOPIC: {prompt}
 VISUAL STYLE: {style}
-TARGET DURATION: approximately {requested_duration} seconds (you can adjust between 45-180s based on content needs)
+TARGET DURATION: EXACTLY {requested_duration} seconds — you MUST produce duration_seconds={requested_duration} unless the topic absolutely cannot fit (maximum ±15% deviation allowed). Do NOT default to 60s.
 
 Create a comprehensive, visually rich brief that will result in a stunning animated explanation.
 Focus on making abstract concepts concrete through visual demonstrations.

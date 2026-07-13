@@ -244,9 +244,15 @@ def run_pipeline(
             run_prompt_agent(prompt, style, duration_seconds)
         )
 
-        # Let LLM decide the optimal duration
-        duration_seconds = script.get("duration_seconds", duration_seconds)
-        duration_seconds = max(30, min(300, duration_seconds))
+        # Respect the user's requested duration: allow the LLM to adjust by
+        # at most ±15%, but never let it silently default to 60s.
+        llm_duration = script.get("duration_seconds", duration_seconds)
+        tolerance = max(10, int(duration_seconds * 0.15))  # e.g. 30s req → ±5s, 120s req → ±18s
+        duration_seconds = max(
+            duration_seconds - tolerance,
+            min(duration_seconds + tolerance, int(llm_duration)),
+        )
+        duration_seconds = max(20, min(300, duration_seconds))  # hard limits
 
         _update_video(
             db, video_id,
